@@ -151,52 +151,63 @@ main{display:flex;gap:20px;padding:20px}
 <!-- CARRITO -->
 <div class="carrito">
   <h2>🛒 Carrito</h2>
-  <div id="lista"></div>
-  <div class="total" id="total">Total: $0</div>
-  <a id="whatsapp" class="whatsapp" target="_blank">Comprar por WhatsApp</a>
+  <pre id="lista">Carrito vacío</pre>
+  <p>Total: <strong id="total">$0</strong></p>
+  <button onclick="comprarWhatsApp()" class="whatsapp">
+    Comprar por WhatsApp
+  </button>
+</div>
 </div>
 
 </main>
 
 <script>
-let carrito=[];
-let total=0;
+let carrito = [];
 
-function agregar(nombre,precio){
-  carrito.push({nombre,precio});
-  total+=precio;
-  render();
+function agregar(nombre, precio) {
+  const item = carrito.find(p => p.nombre === nombre);
+
+  if (item) {
+    item.cantidad++;
+  } else {
+    carrito.push({ nombre, precio, cantidad: 1 });
+  }
+
+  actualizarCarrito();
 }
 
-function quitar(i){
-  total-=carrito[i].precio;
-  carrito.splice(i,1);
-  render();
+function actualizarCarrito() {
+  let total = 0;
+  let lista = "";
+
+  carrito.forEach(p => {
+    total += p.precio * p.cantidad;
+    lista += ${p.nombre} x${p.cantidad} - $${(p.precio * p.cantidad).toLocaleString()}\n;
+  });
+
+  document.getElementById("total").innerText = $${total.toLocaleString()};
+  document.getElementById("lista").innerText = lista || "Carrito vacío";
 }
 
-function render(){
-  const lista=document.getElementById("lista");
-  lista.innerHTML="";
-  carrito.forEach((p,i)=>{
-    lista.innerHTML+=`
-      <div class="item">
-        <span>${p.nombre}</span>
-        <span>$${p.precio.toLocaleString()}
-        <button onclick="quitar(${i})">x</button></span>
-      </div>`;
+function comprarWhatsApp() {
+  if (carrito.length === 0) {
+    alert("El carrito está vacío");
+    return;
+  }
+
+  let mensaje = "Hola MAXPRO MOTOS, quiero comprar:\n\n";
+  let total = 0;
+
+  carrito.forEach(p => {
+    mensaje += - ${p.nombre} x${p.cantidad} - $${(p.precio * p.cantidad).toLocaleString()}\n;
+    total += p.precio * p.cantidad;
   });
 
-  document.getElementById("total").innerText="Total: $"+total.toLocaleString();
-  document.getElementById("contador").innerText=carrito.length;
+  mensaje += \nTotal: $${total.toLocaleString()};
 
-  let msg="Hola, quiero comprar:%0A";
-  carrito.forEach(p=>{
-    msg+=- ${p.nombre} $${p.precio}%0A;
-  });
-  msg+=Total: $${total};
-
-  document.getElementById("whatsapp").href=
-   "https://wa.me/57TU_NUMERO?text="+msg;
+  const telefono = "549XXXXXXXXXX"; // ← TU NÚMERO
+  const url = https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)};
+  window.open(url, "_blank");
 }
 </script>
 
